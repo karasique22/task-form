@@ -1,4 +1,5 @@
 export interface FormData {
+  token: string
   title: string
   description: string
   tags: string

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Form, Input,  Switch, Button, message } from 'antd'
-import { motion, AnimatePresence } from 'framer-motion'
 import { createTask } from '@/app/actions'
 import { BudgetFields } from './form/BudgetFields'
 import { DeadlineFields } from './form/DeadlineFields'
@@ -16,16 +15,24 @@ export function TaskForm() {
   const [form] = Form.useForm()
   const [messageApi, contextHolder] = message.useMessage()
 
+  useEffect(() => {
+    const savedToken = localStorage.getItem('token')
+    if (savedToken) {
+      form.setFieldValue('token', savedToken)
+    }
+  }, [form])
+
   const handleSubmit = async (values: FormData) => {
     setLoading(true)
     
     try {
-      const token = localStorage.getItem('token') || ''
-      const result = await createTask(values, token)
+      localStorage.setItem('token', values.token)
+      
+      const result = await createTask(values)
       
       if (result.success) {
         messageApi.success('Задача успешно опубликована')
-        form.resetFields()
+        form.resetFields(['title', 'description', 'tags', 'budget_from', 'budget_to', 'deadline_days', 'reminds', 'all_auto_responses', 'rules_budget_from', 'rules_budget_to', 'rules_deadline_days', 'rules_qty_freelancers'])
       } else {
         throw new Error(result.error)
       }
@@ -49,6 +56,14 @@ export function TaskForm() {
           all_auto_responses: false
         }}
       >
+        <Form.Item
+          label="API Токен"
+          name="token"
+          rules={[{ required: true, message: 'Введите ваш API токен' }]}
+        >
+          <Input.Password />
+        </Form.Item>
+
         <Form.Item
           label="Название задачи"
           name="title"

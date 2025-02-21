@@ -1,9 +1,9 @@
 import type { FormData } from '@/types/form'
 
-export async function createTask(formData: FormData, token: string) {
+export async function createTask(formData: FormData) {
   try {
     const params = {
-      token,
+      token: formData.token,
       title: formData.title,
       description: formData.description,
       tags: formData.tags,
